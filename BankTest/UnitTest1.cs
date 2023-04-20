@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using BankAccountNS;
 using System;
+using System.Security.Principal;
 
 namespace BankTest
 {
@@ -74,6 +75,56 @@ namespace BankTest
             Assert.Fail();
             
 
+
+        }
+
+        [TestMethod]
+        public void Credit_WithValidAmount_UpdatesBalance()
+        {
+            double beginningBalance = 7.99;
+            double creditAmount = 10;
+            BankAccount account = new BankAccount("Mr. Bryan Walton", beginningBalance);
+
+            // act  
+            account.Credit(creditAmount);
+
+            // assert  
+            double actual = account.Balance;
+            Assert.AreEqual((beginningBalance + creditAmount), actual, 0.001, "Account not debited correctly");
+        }
+
+        [TestMethod]
+        public void Credit_WhenAmountIsLessThanZero_ShouldThrowArgumentOutOfRange()
+        {
+            double beginningBalance = 11.99;
+            double creditAmount = -100.00;
+            BankAccount account = new BankAccount("Mr. Bryan Walton", beginningBalance);
+
+            // act  
+            try
+            {
+                account.Credit(creditAmount);
+            }
+            catch (ArgumentOutOfRangeException e)
+            {
+                StringAssert.Contains(e.Message, BankAccount.CreditAmountLessThanZeroMessage);
+                return;
+            }
+
+            Assert.Fail();
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(Exception))]
+        public void Credit_WhenAccountIsFrozen()
+        {
+            double beginningBalance = 11.99;
+            double creditAmount = 10;
+            BankAccount account = new BankAccount("Mr. Bryan Walton", beginningBalance);
+            account.ToggleFreeze();
+
+            account.Credit(creditAmount);
+            
 
         }
 
